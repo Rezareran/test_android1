@@ -2,72 +2,13 @@
 <html>
   <head>
     <title>Acceleration Example</title>
-    <style>
-        html{height: 100%;}
-        body{height: 100%;margin:0;padding:0;}
-        #map_placer{height:100%;width:100%}
-    </style>
     <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmROGgVa7iOnQvnJYcCgg0fh3FCsRPIao&sensor=true"></script>
-    <script type="text/javascript" charset="utf-8">
-
-    // The watch id references the current `watchAcceleration`
-    var watchID = null;
-        
-            // Wait for device API libraries to load
-    //
-    document.addEventListener("deviceready", onDeviceReady, false);
-
-    // device APIs are available
-    //
-    function onDeviceReady() {
-        navigator.geolocation.getCurrentPosition(onSuccess,onError);
-    }
-
-        
-    function onSuccess(position) {
-                var latLng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
-                //Select map options
-                var mapOptions = {
-                    center: latLng,
-                    panControl: false,
-                    zoomControl: true,
-                    zoom: 16,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP
-                };
-                var map = new google.maps.Map(document.getElementById('map_placer'),mapOptions);
-                var marker = new google.maps.Marker({position: latLng,map: map});
-            }
-
-    // onError: Failed to get the acceleration
-    //
-    function onError() {
-        var errString = '';
-        
-        if(error.code){
-            switch(error.code){
-                case 1:
-                    errorString = 'Can not fetch the location info because we do not have premission';
-                    break;
-                case 2:
-                    errorString = 'The location can not be determind';
-                    break;
-                case 3:
-                    errorString = 'There was a timeout';
-                    break;
-                default:
-                    errorString = 'Unknown Error';
-                    break;
-            }
-            var element = document.getElementById("map_placer");
-            element.innerHTML = errString;
-        }
-        
-    }
-
-    </script>
+    <script type="text/javascript" charset="utf-8" src="main.js"></script>
   </head>
   <body>
-      <div id="map_placer"></div>
+      <button onclick="takePhoto();" >Take A Photo</button><br/>
+      <button onclick="getPhoto(pictureSource.PHOTOLIBRARY);">Get A Photo</button>
+      <img style="display: none;width:200px;height:190px;" id="dataImage" src="" /><br/>
+      <img style="display: none;width:200px;height:190px;" id="dataImage" src="" />      
   </body>
 </html>
