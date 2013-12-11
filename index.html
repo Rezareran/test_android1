@@ -3,51 +3,79 @@
   <head>
     <title>Acceleration Example</title>
     <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" charset="utf-8" src="jquery.min.js"></script>
     <style>
+        body{
+            background: #000000;
+            color: #ffffff;
+        }
         button{
-            background: #333;
+            display: block;
+            background: red;
             color: #fff;
-            border-radius: 10px;
-            border: 2px #666 solid;
-            padding: 5px 10px;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            margin: 30px; auto;
         }
     </style>
       <script type="text/javascript">
-        function takePhoto(){
-            navigator.device.capture.captureImage(captureSuccess,captureError);
+          
+          var audioCapture = '';
+          
+          document.addEventListener("deviceready", onDeviceReady, false);
+          
+          function onDeviceReady(){
+            audioCapture = navigator.device.capture;
+              
+              $("#recordBtn").bind("touchstart",function(){
+                getAudio();   
+              });
+          }
+                                   
+        function getAudio(){
+            audtioCapture.captureAudio(oncaptureSuccess,onCaptureError,{limit: 1});    
+        }
+              
+        function captureSuccess(audioObject){
+            var i,output = '';
+            for(i = 0;i<audioObject.length;i++){
+                output += 'name: ' + audioObject[i].name + '<br/>' +
+                    'full path: ' + audioObject[i].fullpath + '<br/>' +
+                    'type: ' + audioObject[i].type + '<br/>' +
+                    'created on: ' + new Date(audioObject[i].lastModifiedDate) + '<br/>' +
+                    'size: ' + audioObject[i].size + '<br/>';
+            }
+            
+            $("#recordBtn").before(output);
+            
+        }
+          
+        function onCaptureError(error){
+            var errMsg;
+            switch(error.code){
+                case 0:
+                    errMsg = "Mic failed to record";
+                    break;
+                case 1:
+                    errMsg = "Recording app is currently busy";
+                    break;
+                case 2:
+                    errMsg = "Invalid parameter"
+                    break;
+                case 3:
+                    errMsg = "App was exited before recording was complete";
+                    break;
+                case 4:
+                    errMsg = "Device does not support the audio capture request";
+                    break;
+            }
+            alert(errMsg);
         }
         
-        function captureSuccess(mediaFiles){
-            var i,len;
-            for(i = 0,len = mediaFiles.length;i<len;i++){
-                uploadFile(mediaFiles[i]);
-            }
-        }
-          
-        function captureError(error){
-            var errMsg = "An Error Has Occured " + error.code;
-            navigator.notification.alert(errMsg,null,'Oh No!');
-        }
-          
-        function uploadFile(mediaFile){
-            var ft = new FileTransfer(),
-                    path = mediaFile.fullPath,
-                    name = mediaFile.name;
-            ft.upload{
-                path,
-                "http://vdata.ir/phonegap/upload.php",
-                function(result){
-                    console.log("File Upload Success!");
-                },
-                function(error){
-                    console.log("File Upload Failed!");
-                },
-                {filename: name}};
-        }
-          
       </script>
   </head>
   <body>
-      <button onclick="takePhoto();" >Take A Photo</button><br/>
+      <button id="recordBtn" >Record</button><br/>
   </body>
 </html>
