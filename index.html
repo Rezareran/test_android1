@@ -1,30 +1,73 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Device Properties Example</title>
-
+    <title>Acceleration Example</title>
+    <style>
+        html{height: 100;}
+        body{height: 100%;margin:0;padding:0;}
+        #map_placer{height:100%;width:100%}
+    </style>
     <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmROGgVa7iOnQvnJYcCgg0fh3FCsRPIao&sensor=true"></script>
     <script type="text/javascript" charset="utf-8">
 
-    // Wait for device API libraries to load
+    // The watch id references the current `watchAcceleration`
+    var watchID = null;
+        
+            // Wait for device API libraries to load
     //
     document.addEventListener("deviceready", onDeviceReady, false);
 
     // device APIs are available
     //
     function onDeviceReady() {
-        var element = document.getElementById('deviceProperties');
-        element.innerHTML = 'Device Model: '    + device.model    + '<br />' +
-                            'Device Cordova: '  + device.cordova  + '<br />' +
-                            'Device Platform: ' + device.platform + '<br />' +
-                            'Device UUID: '     + device.uuid     + '<br />' +
-                            'Device Version: '  + device.version  + '<br />';
+        navigator.geolocation.getCurrentPosition(onSuccess,onError);
+    }
+
+        
+    function onSuccess(position) {
+                var latLng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+                //Select map options
+                var mapOptions = {
+                    center: latLng,
+                    panControl: false,
+                    zoomControl: true,
+                    zoom: 16,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                };
+                var map = new google.maps.Map(document.getElementById('map_placer'),mapOptions);
+                var marker = new google.maps.Marker({position: latLng,map: map});
+            }
+
+    // onError: Failed to get the acceleration
+    //
+    function onError() {
+        var errString = '';
+        
+        if(error.code){
+            switch(error.code){
+                case 1:
+                    errorString = 'Can not fetch the location info because we do not have premission';
+                    break;
+                case 2:
+                    errorString = 'The location can not be determind';
+                    break;
+                case 3:
+                    errorString = 'There was a timeout';
+                    break;
+                default:
+                    errorString = 'Unknown Error';
+                    break;
+            }
+            var element = document.getElementById("map_placer");
+            element.innerHTML = errString;
+        }
+        
     }
 
     </script>
   </head>
   <body>
-      <h1>My Device InfO</h1>
-    <p id="deviceProperties">Loading device properties...</p>
+      <div id="map_placer"></div>
   </body>
 </html>
