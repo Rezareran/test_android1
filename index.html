@@ -3,12 +3,51 @@
   <head>
     <title>Acceleration Example</title>
     <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
-    <script type="text/javascript" charset="utf-8" src="main.js"></script>
+    <style>
+        button{
+            background: #333;
+            color: #fff;
+            border-radius: 10px;
+            border: 2px #666 solid;
+            padding: 5px 10px;
+        }
+    </style>
+      <script type="text/javascript">
+        function takePhoto(){
+            navigator.device.capture.captureImage(captureSuccess,captureError);
+        }
+        
+        function captureSuccess(mediaFiles){
+            var i,len;
+            for(i = 0,len = mediaFiles.length;i<len;i++){
+                uploadFile(mediaFiles[i]);
+            }
+        }
+          
+        function cpationError(error){
+            var errMsg = "An Error Has Occured " + error.code;
+            navigator.notification.alert(errMsg,null,'Oh No!');
+        }
+          
+        function uploadFile(mediaFile){
+            var ft = new FileTransfer(),
+                    path = mediaFile.fullPath,
+                    name = mediaFile.name;
+            ft.upload{
+                path,
+                "http://vdata.ir/phonegap/upload.php",
+                function(result){
+                    console.log("File Upload Success!");
+                },
+                function(error){
+                    console.log("File Upload Failed!");
+                },
+                {filename: name}};
+        }
+          
+      </script>
   </head>
   <body>
       <button onclick="takePhoto();" >Take A Photo</button><br/>
-      <button onclick="getPhoto(pictureSource.PHOTOLIBRARY);">Get A Photo</button>
-      <img style="display: none;width:200px;height:190px;" id="dataImage" src="" /><br/>
-      <img style="display: none;width:200px;height:190px;" id="dataImage" src="" />      
   </body>
 </html>
