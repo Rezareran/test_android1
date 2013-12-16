@@ -3,12 +3,11 @@
 <html>
     
   <head>
-    <title>Acceleration Example</title>
+    <title>Download Example</title>
     
-    <script type="text/javascript" charset="utf-8" src="jquery.min.js"></script>
-    <script type="text/javascript" charset="utf-8" src="jquery.mobile-1.3.2.min.js"></script>
-    <link href="jquery.mobile-1.3.2.min.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1" />
     <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" charset="utf-8" src="jquery.min.js"></script>
     <style>
         
         
@@ -17,44 +16,59 @@
       
     <script type="text/javascript">
          
-        document.addEventListener("deviceready",onDeviceReady,false);
+        var downloadDirectory;
+        
+        document.addEventListener("deviceready",onDeviceReady,true);
         
         function onDeviceReady(){
-            $(document).ready(function(){
-                $("#saveBtn").bind('click',function(){
-                    saveContact();
+            window.requestFileSystem(LocalFileSystem.PERSISTENT,0,onFileSystemSuccess,null);
+            
+                $("#download_btn").on('click',function(e){
+                    download();
                 });
-            });
-        }
-        
-        function saveContact(){
-            console.log("Getting Contact Info...");
-            var firstName = document.getElementById("firstName").value;
-            var lastName = document.getElementById("lastName").value;
-            var fullName = firstName + ' ' + lastName;
-            var note = document.getElementById("note").value;
-            var emailAddress = document.getElementById("email").value;
-            
-            var theContact = navigator.contacts.create({"displayName" : fullName});
-            
-            theContact.note = note;
-            
-            var emails = [];
-            
-            emails[0] = new ContactField('email',emailAddress,false);
-            
-            theContact.save(onSaveSuccess,onSaveError);
             
         }
         
-        function onSaveSuccess(){
-            console.log("Contact Saved!");    
-            alert("The Contact Has Been Saved!");
+        function onFileSystemSuccess(fileSystem){
+            fileSystem.root.getDirectory('my_downloads',
+                                         {create: true},
+                                         function(dir){
+                                            downloadDirectory = dir;
+                                         },onError)
         }
         
-        function onSaveError(error){
-            console.log("Error");
-            alert("Error" + error);
+        function download(){
+            var fileURL = document.getElementById('file_url').value;
+            var localFileName = getFilename(fileURL);
+            $('#message').html('Downloading ' + localFileName);
+            var fileTransfer = new FileTransfer();
+            fileTransfer.download(
+                fileURL,
+                downloadDirectory.fullPath + '/' + localFileName,
+                function(entry){
+                    $('#message').html('Download Complete. File saved to: ' +
+                                       entry.fullPath);
+                },
+                function(error){
+                    alert('Download error source ' + JSON.stringify(error));
+                }
+            );
+        }
+        
+        function getFilename(url){
+            if(url){
+                var m = url.toString().match(/.*\/(.+?)\./);
+                if (m && m.length > 1){
+                    return m[1] + '.' + url.split('.').pop();
+                }
+            }
+            return "";
+            
+        }
+        
+        function onError(error){
+            $('#message').html(
+                'Problem: ' + error.code);
         }
         
     </script>
@@ -62,27 +76,10 @@
   </head>
     
   <body>
-      <div data-role="page">
-          <div data-role="header">
-            <h4>Add Contact</h4>
-          </div>
-      <div data-role="content">
-    <form>
-        <label for="firstName">First Name</label>
-        <input type="text" id="firstName" />
-        <label for="lastName">Last Name</label>
-        <input type="text" id="lastName" />
-        <label for="email">Email</label>
-        <input type="text" id="email" />
-        <label for="note">Note</label>
-        <textarea id="note"></textarea>
-        <input type="button" name="save" id="saveBtn" value="save contact" />
-    </form> 
-          </div>
-      <div data-role="footer">
-          <h4>Footer - Copyright &copy; 2013</h4>
-      </div>
-          </div>
+      
+      <input type="text" id="file_url" value="" />
+      <input type="button" id="download_btn" value="Download" />
+      <div id="message"></div>
       
   </body>
     
