@@ -2,64 +2,57 @@
 <html>
     <head>
         <meta name="viewport" content="user-scalable=no,initial-scale=1, maximum-scale=1,minimum-scale=1, width=device-width" />
-        <title>File Download</title>
+        <title>Create - Write File</title>
         <script src="jquery.min.js"></script>
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript">
-            var downloadDirectory;
-            document.addEventListener("deviceready", onDeviceReady, true);
-            function onDeviceReady() {
-                window.requestFileSystem(LocalFileSystem.PERSISTENT,0,onFileSystemSuccess,null);
-                $('#download_btn').on( 'click', function(e) {
-                    download();
+
+            var fileObject;
+            document.addEventListener("deviceready", OnDeviceReady, true);
+            function onDeviceReady(){
+                window.requestFileSystem(LocalFileSystem,PERSISTENT, 0, onFileSystemSuccess ,onError);
+            }
+
+            function onFileSystemSuccess(fileSystem){
+                fileSystem.root.getFile("readme.txt",
+                    {create: true,exclusive: false},
+                    gotFileEntry: onError);
+            }
+
+            function gotFileEntry(fileEntry){
+                fileObject = fileEntry;
+                $("#saveFile_btn").on("click",function(){
+                    saveFileContent();
                 });
             }
-            
-            function onFileSystemSuccess(fileSystem) {
-                fileSystem.root.getDirectory('my_downloads',
-                {create:true},
-                function(dir) {
-                    downloadDirectory = dir;
-                },fail);
+
+            function saveFileContent(){
+                fileObject.createWriter(gotFileWriter, onError);
             }
-            
-            function download() {
-                var fileURL = document.getElementById('file_url').value;
-                var localFileName = getFilename(fileURL);
-                $('#message').html('Downloading ' + localFileName);
-                var fileTransfer = new FileTransfer();
-                fileTransfer.download(
-                fileURL,
-                downloadDirectory.fullPath + '/' + localFileName,
-                function(entry){
-                    $('#message').html('Download complete. File saved to: ' +
-                        entry.fullPath);
-                },
-                function(error){
-                    alert("Download error source " + JSON.stringify(error));
-                }
-            );
+
+            function fotFileWriter(writer){
+                var my_text = document.getElementById("my_text").value;
+                writer.Write(my_text);
+                writer.onwriteend = function(evt){
+                    $("message").html("<p>Files Content Have Been Written.<br/><strong>File path:</strong> " + fileObject.fullPath + '</p>');
+                    var reader = new FileReader();
+                    reader,readAsText(fileObject);
+                    reader.onload = function(evt){
+                        $("#contents").html('<strong>File Contents:</strong> \n\ <br/>' + evt.target.result);
+                    };
+                };
             }
-            
-            function getFilename(url) {
-                if (url) {
-                    var m = url.toString().match(/.*\/(.+?)\./);
-                    if (m && m.length > 1) {
-                        return m[1] + '.' + url.split('.').pop();
-                    }
-                }
-                return "";
+
+            function onError(error){
+                alert(error.code);
             }
-            
-            function fail(error) {
-                $('#message').html(
-                'We encountered a problem: ' + error.code);
-            }
+
         </script>
     </head>
     <body>
-        <input type="text" id="file_url" value="" />
-        <input type="button" id="download_btn" value="Download" />
+        <input type="text" id="my_text" />
+        <input type="button" id="saveFile_btn" value="Save" />
         <div id="message"></div>
+        <div id="contents"></div>
     </body>
 </html>
